@@ -1,7 +1,11 @@
 import asyncio
 import json
+import platform
 import time
 from pathlib import Path
+from typing import Dict
+from typing import List
+from typing import Set
 from typing import Union
 
 from EdgeGPT.EdgeGPT import Chatbot
@@ -46,7 +50,7 @@ class Cookie:
         driver.quit()
 
     @classmethod
-    def files(cls) -> list[Path]:
+    def files(cls) -> List[Path]:
         """Return a sorted list of all cookie files matching .search_pattern"""
         all_files = set(cls.dirpath.glob(cls.search_pattern))
         return sorted(all_files - cls.ignore_files)
@@ -142,6 +146,8 @@ class Query:
             self.create_image()
 
     def log_and_send_query(self, echo: bool, echo_prompt: bool) -> None:
+        if platform.system() == "Windows":
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
         self.response = asyncio.run(self.send_to_bing(echo, echo_prompt))
         name = str(Cookie.current_filepath.name)
         if not self.request_count.get(name):
@@ -199,7 +205,7 @@ class Query:
         return self.response["item"]["messages"][1]["sourceAttributions"]
 
     @property
-    def sources_dict(self) -> dict[str, str]:
+    def sources_dict(self) -> Dict[str, str]:
         """The source names and details as a dictionary"""
         sources_dict = {}
         name = "providerDisplayName"
@@ -219,13 +225,13 @@ class Query:
         return "\n\n".join(code_blocks)
 
     @property
-    def languages(self) -> set[str]:
+    def languages(self) -> Set[str]:
         """Extract all programming languages given in code blocks"""
         code_blocks = self.output.split("```")[1:-1:2]
         return {x.splitlines()[0] for x in code_blocks}
 
     @property
-    def suggestions(self) -> list[str]:
+    def suggestions(self) -> List[str]:
         """Follow-on questions suggested by the Chatbot"""
         return [
             x["text"]

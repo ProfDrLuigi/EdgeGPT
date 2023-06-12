@@ -1,7 +1,9 @@
 import json
 import os
-import httpx
+from typing import List
 from typing import Union
+
+import httpx
 
 from .constants import HEADERS_INIT_CONVER
 from .exceptions import NotAllowedToAccess
@@ -12,7 +14,7 @@ class Conversation:
         self,
         proxy: Union[str, None] = None,
         async_mode: bool = False,
-        cookies: Union[list[dict], None] = None,
+        cookies: Union[List[dict], None] = None,
     ) -> None:
         if async_mode:
             return
@@ -67,7 +69,7 @@ class Conversation:
     @staticmethod
     async def create(
         proxy: Union[str, None] = None,
-        cookies: Union[list[dict], None] = None,
+        cookies: Union[List[dict], None] = None,
     ) -> "Conversation":
         self = Conversation(async_mode=True)
         self.struct = {
